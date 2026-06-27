@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione mappa1</title>
+    <style>
+        .bottone {
+            font-size: 22px;
+            width: 150px;
+            height: 30px;
+            border-radius: 20%;
+            border-color: rgb(248, 85, 9);
+            background-color: #FFF44F;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            margin-left: 39%
+        }
+
+        .bottone:hover {
+            background-color: rgb(7, 248, 7);
+
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #181bd1;
+        }
+    </style>
+</head>
+
+
+
+<body>
+    <form action="index.html" method="GET">
+        <button class="bottone">Torna indietro</button>
+        <!-- L'immagine che aprirà la foto -->
+
+        <img height="100%" width="100%" id="mappaImg" src='immagine_mappa' alt="Mappa" ;>
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const immagine_mappa = urlParams.get('immagine_mappa');
+            document.getElementById('mappaImg').src = immagine_mappa;
+            var numero = 0
+            function lampeggio(mappaImg) {
+
+                if (numero == 0) {
+                    document.getElementById('mappaImg').src = immagine_mappa;
+                    numero = 1
+                }
+                else {
+                    document.getElementById('mappaImg').src = 'immagini/zonabase.jpg';
+                    numero = 0
+                }
+            }
+            setInterval(lampeggio, 500)
+            lampeggio(mappaImg)
+        </script>
+
+</body>

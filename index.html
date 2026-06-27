@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Elenco CSV</title>
+    <script src="codice.js"></script>
+    <link rel="manifest" href="/manifest.json">
+
+    <style>
+        /* Struttura della pagina */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #181bd1;
+        }
+
+        /* Nuovo titolo principale in alto */
+        .titolo-principale {
+            color: white;
+            text-align: center;
+            font-size: 48px;
+            font-family: centaur;
+        }
+
+        /* Contenitore per i due pannelli affiancati */
+        .main-container {
+            display: flex;
+            gap: 20px;
+
+        }
+
+        .pannello-sinistro {
+            width: 80%;
+            background: rgb(142, 105, 241);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .pannello-destro {
+            width: 15%;
+            text-align: center;
+            background: rgb(142, 105, 241);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            /* Sostituito margin-top per un corretto funzionamento dello sticky */
+            height: fit-content;
+        }
+
+        /* Input di ricerca */
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: #edf06b;
+        }
+
+        /* Tabella dati */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+
+        td,
+        th {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: hsl(41, 97%, 49%);
+        }
+
+        tr {
+            cursor: pointer;
+            transition: background 0.2s;
+
+        }
+
+        tr:hover {
+            background: #9e32f7;
+        }
+
+        /* Contenitore Immagine */
+        .box-foto {
+
+            /* Adattato al pannello destro */
+            width: 190px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .h2 {
+            color: azure;
+            font-size: 28px;
+        }
+
+        .h2:hover {
+            color: chartreuse;
+        }
+
+        .info {
+            display: flex;
+
+            color: #edf06b;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- INTESTAZIONE GENERALE SOPRA A TUTTO -->
+    <img src="immagini/Stemma.jpg" width="5%" height="5%" style="float: left;">
+    <h1 class="titolo-principale">Cimitero di Isola Della Scala</h1>
+    <h3 style="color: white;text-align: center;font-family: centaur;font-size: 30px;">Ricerca zona sepoltura</h3>
+    <div class="info">
+        <h6 class="info">Software by Antonio</h6>
+        <h6 class="info" style="margin-left: 68%;">Ultimo aggiornamento</h6>
+        <h6 class="info" style="margin-left: 1%;" id="varultimoins"></h6>
+    </div>
+    <!-- CONTENITORE PANNELLI AFFIANCATI -->
+    <div class="main-container">
+
+        <!-- SINISTRA: Filtro e Tabella -->
+        <div class="pannello-sinistro">
+            <h2 style="text-align: center;">Cerca nell'elenco</h2>
+            <input type="text" id="filtro" placeholder="Digita un cognome o un nome per filtrare...">
+            <table>
+                <thead>
+                    <tr>
+                        <th>COGNOME</th>
+                        <th>NOME</th>
+                        <th>DATAN</th>
+                        <th>DATAM</th>
+                    </tr>
+                </thead>
+                <tbody id="tabella-dati">
+                    <!-- I dati del file CSV compariranno qui -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DESTRA: Visualizzatore Foto -->
+        <div class="pannello-destro">
+            <h2>Foto</h2>
+            <form action="Mappa.html" method="GET">
+                <a class="h2" id="mappaLink" href="#">Vai alla mappa</a><br><br><br>
+                <div class="box-foto">
+                    <img id="foto-profilo" src="immagini/Abazia.jpg" alt="Seleziona un record per vedere la foto">
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        let datiCompleti = [];
+
+        window.onload = function () {
+            fetch('dati.csv')
+                .then(response => {
+                    if (!response.ok) throw new Error("File CSV non trovato!");
+                    return response.text();
+                })
+                .then(data => elaboraCSV(data))
+                .catch(error => alert("Errore di caricamento: controlla che dati.csv sia nella cartella corrente."));
+        };
+
+        function elaboraCSV(csvText) {
+            const righe = csvText.split('\n');
+            datiCompleti = [];
+
+            for (let i = 1; i < righe.length; i++) {
+                const rigaPulita = righe[i].trim();
+                if (rigaPulita === "") continue;
+                const colonne = rigaPulita.split(';');
+                if (colonne.length >= 7) {
+                    datiCompleti.push({
+                        COGNOME: colonne[0],
+                        NOME: colonne[1],
+                        DATAN: colonne[2],
+                        DATAM: colonne[3],
+                        FOTO: colonne[4],
+                        POSIZIONE: colonne[5],
+                        DATAINS: colonne[6]
+                    });
+                }
+            }
+            mostraTabella(datiCompleti);
+        }
+
+        function mostraTabella(dati) {
+            const tbody = document.getElementById('tabella-dati');
+            tbody.innerHTML = '';
+
+            if (dati.length === 0) {
+                tbody.innerHTML = `<tr>
+                    <td colspan="4" style="text-align:center; color:gray;">Nessun risultato trovato</td>
+                </tr>`;
+                return;
+            }
+
+            dati.forEach(persona => {
+                const tr = document.createElement('tr');
+                tr.onclick = function () {
+                    document.getElementById('foto-profilo').src = persona.FOTO;
+                    var delta = persona.POSIZIONE;
+                    var ipsilon = persona.DATAINS;
+                    document.getElementById("varultimoins").textContent = ipsilon;
+                    document.getElementById("mappaLink").href = "Mappa.html?immagine_mappa=" + encodeURIComponent(delta);
+                };
+
+                tr.innerHTML = `
+                    <td><strong>${persona.COGNOME}</strong></td>
+                    <td>${persona.NOME}</td>
+                    <td>${persona.DATAN}</td>
+                    <td>${persona.DATAM}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('filtro').addEventListener('input', function (e) {
+            const testoFiltro = e.target.value.toLowerCase();
+            const datiFiltrati = datiCompleti.filter(persona => {
+                return persona.COGNOME.toLowerCase().includes(testoFiltro) ||
+                    persona.NOME.toLowerCase().includes(testoFiltro);
+            });
+
+            mostraTabella(datiFiltrati);
+        });
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js');
+        }
+    </script>
+</body>
+
+</html>
